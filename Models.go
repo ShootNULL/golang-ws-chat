@@ -7,7 +7,7 @@ type User struct {
 }
 
 type Message struct {
-	//UserFromName string `json:"userfromname"`
-	UserNameTo string `json:"usernameto"`
-	Message    string `json:"message"`
+	UserFromName string `json:"userfromname"`
+	UserNameTo   string `json:"usernameto"`
+	Message      string `json:"message"`
 }

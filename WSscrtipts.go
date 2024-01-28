@@ -7,7 +7,7 @@ import (
 )
 
 var clients = make(map[*websocket.Conn]bool)
-var clientsNames = []string{}
+var clientsNames = make(map[*websocket.Conn]string)
 var broadcast = make(chan Message)
 
 func handleWsConnections(w http.ResponseWriter, r *http.Request) {
@@ -28,16 +28,16 @@ func handleWsConnections(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 
 	clients[conn] = true
-	clientsNames = append(clientsNames, user.Name)
+	clientsNames[conn] = user.Name
 
 	for {
 		var msg Message
 		err := conn.ReadJSON(&msg)
-
+		msg.UserFromName = clientsNames[conn]
 		if err != nil {
 			fmt.Println(err)
 			delete(clients, conn)
-
+			delete(clientsNames, conn)
 			return
 		}
 
@@ -53,16 +53,16 @@ func handleMessages() {
 		iterator := 0
 		for client := range clients {
 
-			if clientsNames[iterator] != msg.UserNameTo {
+			if clientsNames[client] != msg.UserNameTo {
 				iterator++
 			} else {
-				err := client.WriteJSON(msg.Message)
-				//log.Print(clientsNames[iterator], "", msg.UserNameTo, "", clientsNames)
+				err := client.WriteJSON(msg)
 
 				if err != nil {
 					fmt.Println(err)
 					client.Close()
 					delete(clients, client)
+					delete(clientsNames, client)
 				}
 			}
 
