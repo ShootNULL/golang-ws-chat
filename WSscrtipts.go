@@ -10,6 +10,12 @@ var clients = make(map[*websocket.Conn]bool)
 var clientsNames = make(map[*websocket.Conn]string)
 var broadcast = make(chan Message)
 
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
 func handleWsConnections(w http.ResponseWriter, r *http.Request) {
 
 	conn, err := upgrader.Upgrade(w, r, nil)
